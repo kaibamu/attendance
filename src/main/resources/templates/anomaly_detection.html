@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+<meta charset="UTF-8">
+<title>異常検知　ー　勤怠管理システム</title>
+</head>
+<body>
+	<div class = "container">
+		<h1>異常検知</h1>
+		<p>以下の勤怠記録に異常が検知されました</p>
+		<table>
+			<thead>
+				<tr>
+					<th>ID</th>
+					<th>ユーザー名</th>
+					<th>日付</th>
+					<th>出勤</th>
+					<th>退勤</th>
+					<th>休憩開始</th>
+					<th>休憩終了</th>
+					<th>場所</th>
+					<th>ステータス</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="anomaly : ${anomalies}">
+					<td th:text="${anomaly.id}"></td>
+					<td th:text="${anomaly.user.username}"></td>
+					<td th:text="${anomaly.recordDate}"></td>
+					<td th:text="${anomaly.checkInTime}"></td>
+					<td th:text="${anomaly.checkOutTime}"></td>
+					<td th:text="${anomaly.breakStartTime}"></td>
+					<td th:text="${anomaly.breakEndTime}"></td>
+					<td th:text="${anomaly.location}"></td>
+					<td th:text="${anomaly.status}"></td>
+				</tr>
+				<tr th:if="${#lists.isEmpty(anomalies)}">
+					<td colspan="9">異常な勤怠記録はありません。</td>
+				</tr>
+			</tbody>
+		</table>
+		
+		<div class = "button-group">
+			<a th:href="@{/dashboard}" class="button secondary">ダッシュボードに戻る</a>
+		</div>
+	</div>
+</body>
+</html>

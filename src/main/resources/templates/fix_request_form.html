@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+	
+<head>
+	<meta charset="UTF-8">
+	<title>修正依頼 - 勤怠管理システム</title>
+	<link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+	<div class = "container">
+		<h1>勤怠修正依頼</h1>
+		<P>以下の勤怠記録を修正を依頼します。</P>
+		<table>
+			<tr><th>日付</th><td th:text="${attendance.recordDate}"></td></tr>
+			<tr><th>出勤</th><td th:text="${attendance.checkInTime}"></td></tr>
+			<tr><th>退勤</th><td th:text="${attendance.checkOutTime}"></td></tr>
+			<tr><th>休憩開始</th><td th:text="${attendance.breakStartTime}"></td></tr>
+			<tr><th>休憩終了</th><td th:text="${attendance.breakEndTime}"></td></tr>
+		</table>
+		
+		<form th:action="@{/attendance/history/{id}/request-fix(id=${attendance.id})}" method="post">
+			<p>
+				<label for="newCheckInTime">新しい出勤時刻:</label>
+				<input type="datetime-local" id="newCheckInTime"th:value="${attendance.checkInTime}" required>
+			</p>
+			
+			<p>
+				<label for="newCheckOutTime">新しい退勤時刻:</label>
+				<input type="datetime-local" id="newCheckOutTime"name="newCheckOutTime"th:value="${attendance.checkOutTime}" required>
+			</p>
+			
+			<P>
+				<label for="newBreakEndTime">新しい休憩終了時刻 (任意):</label>
+				<input type="datetime-local" id="newBreakEndTime"name="newBreakEndTime"th:value="${attendance.breakEndTime}">
+			</P>
+			
+			<p>
+				<label for="reason">修正理由:</label>
+				<textarea id="reason" name="reason" rows="5" required></textarea>
+			</p>
+			
+			<div class = "button-group">
+				<button type="submit">依頼を送信</button>
+				<a th:href="@{/attendance/history}" class="button secondary">キャンセル</a>
+			</div>
+		</form>
+	</div>
+</body>
+</html>

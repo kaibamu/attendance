@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+	<meta charset="UTF-8">
+	<title>勤怠履歴詳細 - 勤怠管理システム</title>
+	<link rel = "stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+	<diV class = "container">
+		<h1>勤怠履歴詳細</h1>
+		<p>あなたの勤怠履歴です。</p>
+		
+		<div th:if="${param.success}" class="success-message">
+			<span th:if="${param.success == 'fixRequestSubmitted'}">修正依頼が送信されました。</span>
+		</div>
+		
+		<table>
+			<thead>
+				<tr>
+					<th>日付</th>
+					<th>出勤</th>
+					<th>退勤</th>
+					<th>休憩開始</th>
+					<th>休憩終了</th>
+					<th>場所</th>
+					<th>ステータス</th>
+					<th>操作</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="record : ${attendanceRecords}">
+				<td th:text="${record.recordDate}"></td>
+				<td th:text="${record.checkInTime}"></td>
+				<td th:text="${record.checkOutTime}"></td>
+				<td th:text="${record.breakStartTime}"></td>
+				<td th:text="${record.breakEndTime}"></td>
+				<td th:text="${record.location}"></td>
+				<td th:text="${record.status}"></td>
+				<td>
+					<a th:href="@{/attendance/history/{id}/request-fix(id=${record.id})}" class="buttonsecondary">修正依頼</a>
+				</td>
+				</tr>
+				
+				<tr th:if="${#lists.isEmpty(attendanceRecords)}">
+					<td colspan="8">勤怠記録がありません。</td>
+				</tr>
+			</tbody>
+		</table>
+		<div class =  "button group">
+			<a th:href="@{/dashboard}" class="button secondary">ダッシュボードに戻る</a>
+		</div>
+	</diV>
+</body>
+</html>

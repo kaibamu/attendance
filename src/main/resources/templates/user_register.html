@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>ユーザー登録</title>
+</head>
+<body>
+<h2>ユーザー登録（管理者）</h2>
+
+<p th:if="${error}" th:text="${error}" style="color:red;"></p>
+
+<form th:action="@{/admin/users}" th:object="${form}" method="post">
+
+  <div>
+    <label>ユーザーID</label><br>
+    <input th:field="*{username}" required>
+  </div>
+
+  <div>
+    <label>パスワード</label><br>
+    <input th:field="*{password}" type="password" required>
+  </div>
+
+  <div>
+    <label>権限</label><br>
+    <select th:field="*{role}">
+      <option value="EMPLOYEE">社員</option>
+      <option value="ADMIN">管理者</option>
+    </select>
+  </div>
+
+  <div>
+    <label>Email</label><br>
+    <input th:field="*{email}" type="email">
+  </div>
+
+  <div>
+    <label>Slack Webhook</label><br>
+    <input th:field="*{slackWebhook}">
+  </div>
+
+  <br>
+  <button type="submit">登録</button>
+</form>
+</body>
+</html>
