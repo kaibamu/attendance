@@ -2,22 +2,26 @@ package com.example.attendance.controller;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Locale;
 
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.example.attendance.dto.AdminAttendanceSearchCondition;
 import com.example.attendance.entity.Attendance;
 import com.example.attendance.repository.UserRepository;
 import com.example.attendance.service.AttendanceService;
@@ -40,18 +44,53 @@ public class AdminController {
 		this.userRepository = userRepository;
 	}
 
+	@ModelAttribute("cond")
+	public AdminAttendanceSearchCondition prepareCondition() {
+		return new AdminAttendanceSearchCondition();
+	}
+
 	@GetMapping("/dashboard")
-	public String adminDashboard(Model model) {
-		model.addAttribute("allAttendanceRecords", attendanceService.getAllAttendance());
+	public String adminDashboard(
+			@org.springframework.web.bind.annotation.ModelAttribute("cond") com.example.attendance.dto.AdminAttendanceSearchCondition cond,
+			Model model) {
+
+		if (cond == null) {
+			cond = new AdminAttendanceSearchCondition();
+		}
+
+		if (cond.getFrom() == null && cond.getTo() == null) {
+			LocalDate today = LocalDate.now();
+			cond.setFrom(today.withDayOfMonth(1));
+			cond.setTo(today);
+		}
+
+		Long userId = cond.getUserId();
+		LocalDate from = cond.getFrom();
+		LocalDate to = cond.getTo();
+
+		List<Attendance> attendanceRecords;
+
+		if (userId != null && from != null && to != null) {
+			attendanceRecords = attendanceService.getAttendanceByUserIdAndDateRange(userId, from, to);
+		} else if (from != null && to != null) {
+			attendanceRecords = attendanceService.getAttendanceByDateRange(from, to);
+		} else if (userId != null) {
+			attendanceRecords = attendanceService.getAttendanceByUserId(userId);
+		} else {
+			attendanceRecords = attendanceService.getAllAttendance();
+		}
+
+		model.addAttribute("allAttendanceRecords", attendanceService.toViewList(attendanceRecords));
 		model.addAttribute("users", userRepository.findAll());
+
 		return "admin_dashboard";
 	}
 
 	@GetMapping("/attendance")
 	public String listAllAttendance(
 			@RequestParam(value = "userId", required = false) Long userId,
-			@RequestParam(value = "startDate", required = false) LocalDate startDate,
-			@RequestParam(value = "endDate", required = false) LocalDate endDate,
+			@RequestParam(value = "startDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+			@RequestParam(value = "endDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
 			Model model) {
 
 		List<Attendance> attendanceRecords;
@@ -66,9 +105,8 @@ public class AdminController {
 			attendanceRecords = attendanceService.getAllAttendance();
 		}
 
-		model.addAttribute("allAttendanceRecords", attendanceRecords);
+		model.addAttribute("allAttendanceRecords", attendanceService.toViewList(attendanceRecords));
 		model.addAttribute("users", userRepository.findAll());
-
 		return "admin_dashboard";
 	}
 
@@ -99,75 +137,114 @@ public class AdminController {
 	@GetMapping("/attendance/csv")
 	public void exportAttendanceCsv(
 			@RequestParam(value = "userId", required = false) Long userId,
-			@RequestParam(value = "startDate", required = false) LocalDate startDate,
-			@RequestParam(value = "endDate", required = false) LocalDate endDate,
+			@RequestParam(value = "from", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+			@RequestParam(value = "to", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
 			HttpServletResponse response) throws IOException {
 
 		response.setContentType("text/csv; charset=UTF-8");
-		response.setHeader("Content-Disposition",
-				"attachment; filename=\"attendance_records.csv\"");
+		response.setHeader("Content-Disposition", "attachment; filename=\"attendance_records.csv\"");
 
-		List<Attendance> records = attendanceService.getAllAttendance();
+		response.getOutputStream().write(new byte[] { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF });
 
-		if (userId != null) {
-			records = records.stream()
-					.filter(att -> att.getUser() != null && att.getUser().getId().equals(userId))
-					.collect(Collectors.toList());
+		List<Attendance> records;
+
+		if (userId != null && from != null && to != null) {
+			records = attendanceService.getAttendanceByUserIdAndDateRange(userId, from, to);
+		} else if (from != null && to != null) {
+			records = attendanceService.getAttendanceByDateRange(from, to);
+		} else if (userId != null) {
+			records = attendanceService.getAttendanceByUserId(userId);
+		} else {
+			records = attendanceService.getAllAttendance();
 		}
 
-		if (startDate != null) {
-			records = records.stream()
-					.filter(att -> att.getRecordDate() != null &&
-							!att.getRecordDate().isBefore(startDate))
-					.collect(Collectors.toList());
-		}
+		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-		if (endDate != null) {
-			records = records.stream()
-					.filter(att -> att.getRecordDate() != null &&
-							!att.getRecordDate().isAfter(endDate))
-					.collect(Collectors.toList());
-		}
+		try (PrintWriter writer = new PrintWriter(response.getOutputStream(), true, StandardCharsets.UTF_8)) {
 
-		try (PrintWriter writer = response.getWriter()) {
-			writer.append("ID,ユーザー名,日付,出勤,退勤,休憩開始,休憩終了,場所,ステータス\n");
+			writer.append("ID,ユーザー名,日付,出勤,退勤,実働(数値),休憩開始,休憩終了,場所,ステータス\n");
 
-			DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+			DateTimeFormatter timeFmt = DateTimeFormatter.ofPattern("HH:mm");
 
 			for (Attendance record : records) {
-				String recordDateStr = record.getRecordDate() != null
-						? record.getRecordDate().toString()
-						: "";
-				String checkInStr = record.getCheckInTime() != null
-						? record.getCheckInTime().format(dateTimeFormatter)
-						: "";
-				String checkOutStr = record.getCheckOutTime() != null
-						? record.getCheckOutTime().format(dateTimeFormatter)
-						: "";
-				String breakStartStr = record.getBreakStartTime() != null
-						? record.getBreakStartTime().format(dateTimeFormatter)
-						: "";
-				String breakEndStr = record.getBreakEndTime() != null
-						? record.getBreakEndTime().format(dateTimeFormatter)
-						: "";
-				String locationStr = record.getLocation() != null
-						? record.getLocation()
-						: "";
-				String statusStr = record.getStatus() != null
-						? record.getStatus()
-						: "";
 
-				writer.append(String.format("%d,%s,%s,%s,%s,%s,%s,%s,%s\n",
-						record.getId(),
-						record.getUser().getUsername(),
-						recordDateStr,
-						checkInStr,
-						checkOutStr,
-						breakStartStr,
-						breakEndStr,
-						locationStr,
-						statusStr));
+				String username = (record.getUser() != null && record.getUser().getUsername() != null)
+						? record.getUser().getUsername()
+						: "-";
+
+				String recordDateStr = record.getRecordDate() != null ? record.getRecordDate().toString() : "";
+
+				String checkInStr = record.getCheckInTime() != null ? record.getCheckInTime().format(timeFmt) : "";
+				String checkOutStr = record.getCheckOutTime() != null ? record.getCheckOutTime().format(timeFmt) : "";
+				String breakStartStr = record.getBreakStartTime() != null ? record.getBreakStartTime().format(timeFmt)
+						: "";
+				String breakEndStr = record.getBreakEndTime() != null ? record.getBreakEndTime().format(timeFmt) : "";
+
+				long mins = attendanceService.calcWorkingMinutes(record);
+
+				double workAsDay = mins / 1440.0;
+
+				String workAsDayStr = String.format(Locale.US, "%.6f", workAsDay);
+
+				String workTypeStr = workTypeLabel(record.getWorkType()); // ✅追加
+				String locationStr = record.getLocation() != null ? record.getLocation() : "";
+
+				String statusStr = statusLabel(record.getStatus());
+
+				writer.append(csv(record.getId())).append(",")
+						.append(csv(username)).append(",")
+						.append(csv(recordDateStr)).append(",")
+						.append(csv(checkInStr)).append(",")
+						.append(csv(checkOutStr)).append(",")
+						.append(csv(workAsDayStr)).append(",")
+						.append(csv(breakStartStr)).append(",")
+						.append(csv(breakEndStr)).append(",")
+						.append(csv(workTypeStr)).append(",")
+						.append(csv(locationStr)).append(",")
+						.append(csv(statusStr))
+						.append("\n");
 			}
 		}
 	}
+
+	private String csv(Object value) {
+		if (value == null)
+			return "";
+		String s = String.valueOf(value);
+
+		boolean needQuote = s.contains(",") || s.contains("\n") || s.contains("\r") || s.contains("\"");
+		if (needQuote) {
+			s = s.replace("\"", "\"\"");
+			return "\"" + s + "\"";
+		}
+		return s;
+	}
+
+	private String workTypeLabel(String workType) {
+		if (workType == null || workType.isBlank())
+			return "";
+		return switch (workType) {
+		case "NORMAL" -> "通常";
+		case "DIRECT_IN" -> "直行出勤";
+		case "DIRECT_OUT" -> "直帰退勤";
+		case "DIRECT_RETURN" -> "直行・直帰";
+		default -> workType;
+		};
+	}
+
+	private String statusLabel(String status) {
+		if (status == null || status.isBlank())
+			return "";
+		return switch (status) {
+		case "normal" -> "通常";
+		case "late" -> "遅刻";
+		case "early" -> "早退";
+		case "absence" -> "欠勤";
+		case "pending" -> "申請中";
+		case "approved" -> "承認";
+		case "rejected" -> "却下";
+		default -> status;
+		};
+	}
+
 }

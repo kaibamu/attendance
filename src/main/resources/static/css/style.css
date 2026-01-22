@@ -1,305 +1,345 @@
 @charset "UTF-8";
-body {
-font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-/* ページ全体のフォントを設定する。見やすいサンセリフ系フォントを指定。 */
-margin: 0;
-/* ページ全体の余白をなくす。 */
-padding: 20px;
-/* ページ全体に 20px のパディングを入れる。 */
-background-color: #eef2f7;
-/* ページ背景色を淡いブルー系に設定する。 */
-color: #333;
-/* テキスト色を濃いグレーに設定する。 */
-line-height: 1.6;
-/* 行間を少し広げて読みやすくする。 */
+
+/* ===============================
+   Base / Layout
+================================ */
+
+body{
+  font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin:0;
+  padding:20px;
+  background-color:#eef2f7;
+  color:#333;
+  line-height:1.6;
 }
-.container {
-max-width: 960px;
-/* コンテンツの最大幅を 960px に制限する。 */
-margin: 30px auto;
-/* 上下 30px、左右は中央寄せ。 */
-background-color: #ffffff;
-/* 背景色を白にする。 */
-padding: 30px;
-/* 内側に 30px のパディングを設定する。 */
-border-radius: 10px;
-/* 角を丸めて柔らかい印象にする。 */
-box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-/* 軽い影を付けて浮き上がる感じにする。 */
+
+.container{
+  max-width:1200px;
+  margin:30px auto;
+  background:#fff;
+  padding:30px;
+  border-radius:10px;
+  box-shadow:0 4px 15px rgba(0,0,0,.1);
 }
-h1,
-h2 {
-color: #2c3e50;
-/* 見出しの文字色を濃い青に設定する。 */
-text-align: center;
-/* 見出しを中央揃えにする。 */
-margin-bottom: 30px;
-/* 下に 30px の余白を入れる。 */
-font-size: 2.2em;
-/* 見出しの文字サイズを大きくする。 */
+
+h1,h2{
+  color:#2c3e50;
+  text-align:center;
+  margin-bottom:20px;
 }
-h2 {
-font-size: 1.8em;
-/* h2 の文字サイズを少し小さくする。 */
-margin-top: 40px;
-/* 上に 40px の余白を入れる。 */
-border-bottom: 2px solid #e0e0e0;
-/* 下にボーダーを引いて区切り線を作る。 */
-padding-bottom: 10px;
-/* ボーダーと文字の間に余白を入れる。 */
+
+h1{ font-size:2.2em; }
+
+h2{
+  font-size:1.8em;
+  margin-top:40px;
+  border-bottom:2px solid #e0e0e0;
+  padding-bottom:10px;
 }
-p {
-margin-bottom: 15px;
-/* 段落の下に 15px の余白を設定する。 */
+
+p{ margin-bottom:15px; }
+
+
+/* ===============================
+   Form
+================================ */
+
+label{
+  display:block;
+  margin-bottom:8px;
+  font-weight:700;
+  color:#555;
 }
-label {
-display: block;
-/* ラベルをブロック表示にして改行させる。 */
-margin-bottom: 8px;
-/* 下に 8px の余白を設定する。 */
-font-weight: bold;
-/* 太字にする。 */
-color: #555;
-/* ラベルの文字色を少し薄めのグレーにする。 */
-}
+
+/* ★崩れの原因だった width:calc(100% - 24px) を廃止
+   box-sizing:border-box + width:100% で安定させる */
 input[type="text"],
 input[type="password"],
 input[type="email"],
 input[type="datetime-local"],
 input[type="date"],
+input[type="month"],
 textarea,
-select {
-width: calc(100% - 24px);
-/* フル幅からパディングとボーダー分を引いた幅に設定する。 */
-padding: 12px;
-/* 内側の余白を設定する。 */
-border: 1px solid #ccc;
-/* 枠線を薄いグレーにする。 */
-border-radius: 6px;
-/* 枠を少し丸める。 */
-font-size: 1em;
-/* フォントサイズを標準にする。 */
-box-sizing: border-box;
-/* padding と border を幅に含める。 */
-transition: border-color 0.3s ease;
-/* フォーカス時の枠線色変更を滑らかにする。 */
+select{
+  width:100%;
+  padding:12px;
+  border:1px solid #ccc;
+  border-radius:8px;
+  font-size:1em;
+  box-sizing:border-box;
+  transition:border-color .3s ease, box-shadow .3s ease;
+  background:#fff;
+  color:#333;
 }
+
 input[type="text"]:focus,
 input[type="password"]:focus,
 input[type="email"]:focus,
 input[type="datetime-local"]:focus,
 input[type="date"]:focus,
+input[type="month"]:focus,
 textarea:focus,
-select:focus {
-border-color: #007bff;
-/* フォーカス時に枠線を青色に変える。 */
-outline: none;
-/* デフォルトのアウトラインを消す。 */
-}
-textarea {
-resize: vertical;
-/* 縦方向にのみサイズ変更可能にする。 */
-min-height: 100px;
-/* 高さの最小値を設定する。 */
+select:focus{
+  border-color:#007bff;
+  box-shadow:0 0 0 3px rgba(0,123,255,.15);
+  outline:none;
 }
 
-button,
-.button {
-background-color: #007bff;
-/* ボタンの背景色を青に設定する。 */
-color: white;
-/* ボタン文字色を白にする。 */
-padding: 12px 25px;
-/* ボタンの内側余白を設定する。 */
-border: none;
-/* ボーダーを消す。 */
-border-radius: 6px;
-/* 角を丸める。 */
-cursor: pointer;
-/* マウスカーソルをポインタにする。 */
-font-size: 1.1em;
-/* フォントサイズを少し大きめにする。 */
-transition: background-color 0.3s ease, transform 0.2s ease;
-/* 背景色と transform のアニメーションを滑らかにする。 */
-display: inline-block;
-/* インラインブロックにして横並び可能にする。 */
-margin: 0 10px;
-/* 左右に 10px の余白を入れる。 */
+textarea{
+  resize:vertical;
+  min-height:100px;
 }
-button:hover,
-.button:hover {
-background-color: #0056b3;
-/* ホバー時の背景色を濃い青にする。 */
-transform: translateY(-2px);
-/* ホバー時に少し浮き上がる演出をする。 */
+
+/* selectのoptionはOS側UIになるので念のため */
+select option{
+  color:#111;
+  background:#fff;
 }
-.button.secondary {
-background-color: #6c757d;
-/* グレーのボタンスタイルを設定する。 */
+
+
+/* ===============================
+   Buttons
+================================ */
+
+/* ★ボタンの margin:0 10px がズレを作るので撤去
+   間隔は親の flex + gap で管理 */
+button,.button{
+  background:#007bff;
+  color:#fff;
+  padding:12px 22px;
+  border:none;
+  border-radius:999px; /* 今っぽいピル型 */
+  cursor:pointer;
+  font-size:1.05em;
+  font-weight:700;
+  transition:background-color .2s ease, transform .15s ease, box-shadow .15s ease;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  text-decoration:none;
+  margin:0; /* ★重要 */
+  box-shadow:0 6px 16px rgba(0,0,0,.12);
 }
-.button.secondary:hover {
-background-color: #5a6268;
-/* ホバー時のグレーを少し濃くする。 */
+
+button:hover,.button:hover{
+  background:#0056b3;
+  transform:translateY(-1px);
+  box-shadow:0 10px 24px rgba(0,0,0,.16);
 }
-.button.danger {
-background-color: #dc3545;
-/* 危険操作用の赤いボタンを設定する。 */
+
+.button.primary{ background:#007bff; }
+.button.primary:hover{ background:#0056b3; }
+
+.button.secondary{ background:#6c757d; }
+.button.secondary:hover{ background:#5a6268; }
+
+.button.danger{ background:#dc3545; }
+.button.danger:hover{ background:#c82333; }
+
+.button.logout{ background:#dc3545; color:#fff; }
+.button.logout:hover{ background:#b52a37; }
+
+
+/* ===============================
+   Messages
+================================ */
+
+.error-message{
+  color:#dc3545;
+  font-size:.95em;
+  margin-top:8px;
+  display:block;
+  text-align:center;
 }
-.button.danger:hover {
-background-color: #c82333;
-/* 赤ボタンのホバー時に色を濃くする。 */
+
+.success-message{
+  color:#155724;
+  font-size:1.05em;
+  text-align:center;
+  margin-top:20px;
+  padding:15px;
+  background:#d4edda;
+  border:1px solid #c3e6cb;
+  border-radius:8px;
+}
+
+
+/* ===============================
+   Nav / Layout blocks
+================================ */
+
+.main-nav{
+  text-align:center;
+  margin-bottom:30px;
+}
+
+.main-nav a{
+  background:#34495e;
+  color:#fff;
+  padding:10px 20px;
+  border-radius:999px;
+  text-decoration:none;
+  margin:0 5px;
+  transition:background-color .2s ease, transform .15s ease;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.main-nav a:hover{
+  background:#2c3e50;
+  transform:translateY(-1px);
+}
+
+.punch-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  max-width:420px;
+  margin:0 auto;
+}
+
+.punch-item button{
+  width:100%;
+  padding:12px 14px;
+  border-radius:12px;
+}
+
+.footer-buttons{
+  display:flex;
+  justify-content:center;
+  gap:16px;
+  margin-top:24px;
+}
+
+.footer-buttons form{ margin:0; }
+
+.button-group{
+  display:flex;
+  justify-content:center;
+  gap:16px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+.button-group form{ margin:0; }
+
+
+/* ===============================
+   CSV Actions Area
+================================ */
+
+.csv-actions{
+  margin:12px 0;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+
+/* 月次フォームも横並びで崩れない */
+.csv-actions form{
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+
+/* 月次フォーム内の input month は幅を持ちすぎないように */
+.csv-actions input[type="month"]{
+  width:auto;
+  min-width:160px;
+}
+
+
+/* ===============================
+   Table
+================================ */
+
+.table-responsive{
+  width:100%;
+  overflow-x:auto;
+}
+
+/* ★テーブルは白背景のまま・既存見た目維持 */
+table.attendance-table{
+  width:100%;
+  min-width:980px;
+  border-collapse:collapse;
+  background:#fff;
+  box-shadow:0 2px 8px rgba(0,0,0,.05);
+  border-radius:10px;
+  overflow:hidden;
+  table-layout:auto;
+}
+
+table.attendance-table th,
+table.attendance-table td{
+  border:1px solid #e0e0e0;
+  padding:12px 10px;
+  text-align:left;
+  vertical-align:middle;
+  font-size:14px;
+  white-space:nowrap;
+}
+
+table.attendance-table th{
+  background:#f2f2f2;
+  font-weight:700;
+  color:#444;
+}
+
+table.attendance-table tr:nth-child(even){ background:#f9f9f9; }
+table.attendance-table tr:hover{ background:#f1f1f1; }
+
+.col-date{ width:110px; }
+.col-time{ width:120px; }
+.col-type{ width:140px; }
+.col-status{ width:110px; }
+.col-action{ width:120px; }
+
+table.attendance-table th.col-place,
+table.attendance-table td.col-place{
+  white-space:normal !important;
+  word-break:keep-all;
+  overflow-wrap:break-word;
+  min-width:320px;
+  max-width:520px;
+}
+
+/* Card */
+.card{
+  background:#fff;
+  padding:24px;
+  border-radius:10px;
+  box-shadow:0 2px 10px rgba(0,0,0,0.06);
+  margin-top:30px;
+}
+
+/* 警告バッジ（見やすさ優先） */
+.badge-warn{
+  display:inline-block;
+  padding:4px 10px;
+  border-radius:999px;
+  background:#fde68a;
+  color:#92400e;
+  font-weight:800;
+  font-size:12px;
 }
 .error-message {
-color: #dc3545;
-/* エラーメッセージの文字色を赤にする。 */
-font-size: 0.9em;
-/* 文字を少し小さめにする。 */
-margin-top: 5px;
-/* 上に 5px の余白を入れる。 */
-display: block;
-/* ブロック要素にする。 */
-text-align: center;
-/* 中央揃えにする。 */
+  background-color: #ffeaea;
+  color: #d93025;
+  padding: 10px 14px;
+  border-radius: 6px;
+  border: 1px solid #f5c2c2;
+  font-weight: 500;
 }
+
 .success-message {
-color: #28a745;
-/* 成功メッセージの文字色を緑にする。 */
-font-size: 1.1em;
-/* 文字を少し大きくする。 */
-text-align: center;
-/* 中央揃えにする。 */
-margin-top: 20px;
-/* 上に 20px の余白を入れる。 */
-padding: 15px;
-/* 内側余白を設定する。 */
-background-color: #d4edda;
-/* 背景色を薄い緑にする。 */
-border: 1px solid #c3e6cb;
-/* 薄い緑の枠線を付ける。 */
-border-radius: 5px;
-/* 角を丸める。 */
-}
-/* Tables */
-table {
-width: 100%;
-/* テーブルの幅を 100%にする。 */
-border-collapse: collapse;
-/* セルの境界線を重ねる。 */
-margin-top: 20px;
-/* 上に 20px の余白を入れる。 */
-background-color: #fff;
-/* テーブルの背景を白にする。 */
-box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-/* 軽い影をつける。 */
-border-radius: 8px;
-/* テーブル全体の角を丸める。 */
-overflow: hidden;
-/* テーブルの角丸部分からはみ出した部分を隠す。 */
-}
-th,
-td {
-border: 1px solid #e0e0e0;
-/* セルの枠線を薄いグレーにする。 */
-padding: 12px 15px;
-/* セルの内側余白を設定する。 */
-text-align: left;
-/* 左揃えにする。 */
-}
-th {
-background-color: #f2f2f2;
-/* ヘッダー行の背景色を薄いグレーにする。 */
-font-weight: bold;
-/* ヘッダーテキストを太字にする。 */
-color: #444;
-/* ヘッダーテキストの色を少し濃いグレーにする。 */
-}
-tr:nth-child(even) {
-background-color: #f9f9f9;
-/* 偶数行の背景色を薄いグレーにする。 */
-}
-tr:hover {
-background-color: #f1f1f1;
-/* ホバー時の背景色を少し濃くする。 */
-}
-/* Navigation */
-.main-nav {
-text-align: center;
-/* ナビゲーションリンクを中央揃えにする。 */
-margin-bottom: 30px;
-/* 下に 30px の余白を入れる。 */
-}
-.main-nav a {
-background-color: #34495e;
-/* ナビゲーションリンクの背景色を濃い青系にする。 */
-color: white;
-/* リンク文字色を白にする。 */
-padding: 10px 20px;
-/* リンクの内側余白を設定する。 */
-border-radius: 5px;
-/* 角を丸める。 */
-text-decoration: none;
-/* 下線を消す。 */
-margin: 0 5px;
-/* 左右に 5px の余白を入れる。 */
-transition: background-color 0.3s ease;
-/* 背景色の変化を滑らかにする。 */
-}
-.main-nav a:hover {
-background-color: #2c3e50;
-/* ホバー時の背景色を少し濃くする。 */
-}
-
-.punch-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr; /* 2列 */
-  gap: 12px;
-  max-width: 420px;   /* ここで横幅を整える */
-  margin: 0 auto;     /* 中央寄せ */
-}
-
-/* ログアウトボタン（赤） */
-.button.logout {
-    background-color: #dc3545; /* 赤 */
-    color: #fff;
-}
-
-.button.logout:hover {
-    background-color: #b52a37; /* 濃い赤 */
-}
-
-.punch-item button {
-  width: 100%;
-  padding: 12px 14px;
-  border-radius: 8px;
-}
-.footer-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 16px; 
-  margin-top: 24px;
-}
-
-.footer-buttons form {
-  margin: 0; 
-}
-
-.button-group {
-  display: flex !important;
-  justify-content: center;
-  gap: 16px;
-  align-items: center;
-  flex-wrap: wrap; 
-}
-
-.button-group form {
-  margin: 0 !important;
-}
-/* ログアウトボタン（赤） */
-.button.logout {
-    background-color: #dc3545; 
-    color: #fff;
-}
-
-.button.logout:hover {
-    background-color: #b52a37; 
+  background-color: #e9f7ef;
+  color: #1e7e34;
+  padding: 10px 14px;
+  border-radius: 6px;
+  border: 1px solid #b8e0c2;
+  font-weight: 500;
 }

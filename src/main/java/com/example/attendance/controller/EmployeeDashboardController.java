@@ -25,9 +25,19 @@ public class EmployeeDashboardController {
 
 	@GetMapping("/dashboard")
 	public String dashboard(@AuthenticationPrincipal UserDetails userDetails, Model model) {
+
+		boolean isAdmin = userDetails.getAuthorities().stream()
+				.anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
+
+		if (isAdmin) {
+			return "redirect:/admin/dashboard";
+		}
+
 		User currentUser = userRepository.findByUsername(userDetails.getUsername())
 				.orElseThrow(() -> new RuntimeException("User not found"));
-		model.addAttribute("attendanceRecords", attendanceService.getUserAttendance(currentUser));
+
+		model.addAttribute("attendanceRecords", attendanceService.getUserAttendanceView(currentUser));
 		return "employee_dashboard";
 	}
+
 }

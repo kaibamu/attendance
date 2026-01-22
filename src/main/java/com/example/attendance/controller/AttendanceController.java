@@ -1,7 +1,6 @@
 package com.example.attendance.controller;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.example.attendance.entity.Attendance;
 import com.example.attendance.entity.User;
 import com.example.attendance.repository.UserRepository;
 import com.example.attendance.service.AttendanceService;
@@ -47,26 +45,47 @@ public class AttendanceController {
 
 		attendanceService.punch(currentUser, type, latitude, longitude);
 
-		return "redirect:/employee/dashboard";
+		return "redirect:/attendance/dashboard";
+
+	}
+
+	@GetMapping("/dashboard")
+	public String employeeDashboard(@AuthenticationPrincipal UserDetails userDetails,
+			Model model) {
+
+		User currentUser = userRepository.findByUsername(userDetails.getUsername())
+				.orElseThrow(() -> new RuntimeException("User not found"));
+
+		model.addAttribute("attendanceRecords",
+				attendanceService.getUserAttendanceView(currentUser));
+
+		return "employee_dashboard";
 	}
 
 	@GetMapping("/history")
 	public String showAttendanceHistory(@AuthenticationPrincipal UserDetails userDetails,
 			Model model) {
+
 		User currentUser = userRepository.findByUsername(userDetails.getUsername())
 				.orElseThrow(() -> new RuntimeException("User not found"));
-		model.addAttribute("attendanceRecords", attendanceService.getUserAttendance(currentUser));
+
+		model.addAttribute("attendanceRecords",
+				attendanceService.getUserAttendanceView(currentUser));
+
 		return "attendance_history";
 	}
 
 	@GetMapping("/history/{id}/request-fix")
-	public String showFixRequestForm(@PathVariable("id") Long attendanceId,
+	public String showFixRequestForm(@AuthenticationPrincipal UserDetails userDetails,
+			@PathVariable("id") Long attendanceId,
 			Model model) {
-		Optional<Attendance> attendance = attendanceService.getAttendanceById(attendanceId);
-		if (attendance.isEmpty()) {
-			return "redirect:/attendance/history";
-		}
-		model.addAttribute("attendance", attendance.get());
+
+		User currentUser = userRepository.findByUsername(userDetails.getUsername())
+				.orElseThrow(() -> new RuntimeException("User not found"));
+
+		model.addAttribute("attendanceId", attendanceId);
+		model.addAttribute("currentUserName", currentUser.getUsername());
+
 		return "fix_request_form";
 	}
 

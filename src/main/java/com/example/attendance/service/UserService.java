@@ -24,7 +24,7 @@ public class UserService {
 		User user = new User();
 		user.setUsername(username);
 		user.setPassword(passwordEncoder.encode(rawPassword));
-		user.setRole(role); // "ADMIN" or "EMPLOYEE"（あなたのDBに合わせる）
+		user.setRole(role);
 		user.setEmail(email);
 		user.setSlackWebhook(slackWebhook);
 		user.setEnabled(true);

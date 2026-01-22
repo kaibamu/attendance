@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="page(content)">
+  <div class="container">
+    <div th:insert="${content}"></div>
+  </div>
+</div>
+
+</body>
+</html>

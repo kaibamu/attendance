@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>勤怠一覧（管理者）</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+
+	<div th:fragment="content" xmlns:th="http://www.thymeleaf.org">
+
+	  <form method="get" th:action="@{/admin/attendances}" class="form">
+	    <label>
+	      開始日：
+	      <input type="date" name="from" th:value="${from}">
+	    </label>
+
+	    <label style="margin-left:12px;">
+	      終了日：
+	      <input type="date" name="to" th:value="${to}">
+	    </label>
+
+	    <label style="margin-left:12px;">
+	      社員：
+	      <select name="userId">
+	        <option value="">全員</option>
+	        <option th:each="u : ${users}"
+	                th:value="${u.id}"
+	                th:text="${u.username}"
+	                th:selected="${userId != null and u.id == userId}">
+	        </option>
+	      </select>
+	    </label>
+
+	    <button type="submit" class="button primary" style="margin-left:12px;">
+	      検索
+	    </button>
+	  </form>
+	  <!-- ===== CSV 出力ボタン（検索フォームの直下にまとめる） ===== -->
+	  <div class="csv-actions">
+
+	    <!-- 勤怠一覧CSV（検索条件そのまま） -->
+	    <a th:href="@{/admin/attendances/csv(userId=${userId}, from=${from}, to=${to})}"
+	       class="button secondary">
+	      勤怠CSV
+	    </a>
+
+	    <!-- 週40h超過アラートCSV（to基準。toが無ければ今日） -->
+	    <a th:href="@{/admin/attendances/csv/alert/weekly(date=${to != null ? #temporals.format(to,'yyyy-MM-dd') : #temporals.format(#temporals.createNow(),'yyyy-MM-dd')})}"
+	       class="button secondary">
+	      週40h超過CSV
+	    </a>
+
+	    <!-- 月45h超過アラートCSV（toの年月基準。toが無ければ今月） -->
+	    <a th:href="@{/admin/attendances/csv/alert/monthly(month=${to != null ? #temporals.format(to,'yyyy-MM') : #temporals.format(#temporals.createNow(),'yyyy-MM')})}"
+	       class="button secondary">
+	      月45h超過CSV
+	    </a>
+
+	    <!-- 月次集計CSV：月を選べる -->
+	    <form th:action="@{/admin/attendances/csv/monthly}" method="get" style="display:flex; gap:6px; align-items:center;">
+		<input type="hidden" name="userId" th:value="${userId}">
+	      <label style="margin:0;">月次：</label>
+	      <input type="month" name="month"
+	             th:value="${to != null ? #temporals.format(to,'yyyy-MM') : #temporals.format(#temporals.createNow(),'yyyy-MM')}" />
+	      <button type="submit" class="button primary">月次集計CSV</button>
+	    </form>
+
+	  </div>
+
+
+	  <div class="table-responsive" style="margin-top:16px;">
+	    <table class="attendance-table">
+			<thead>
+			  <tr>
+			    <th>日付</th>
+			    <th>社員</th>
+			    <th>出勤</th>
+			    <th>退勤</th>
+			    <th>実働</th>
+			    <th>残業</th>
+			    <th>深夜</th>
+			    <th>深夜残業</th>
+			    <th>休日</th>
+			    <th>割増</th>
+			    <th>割増(円)</th>
+			    <th>週合計</th>
+			    <th>週超過</th>
+			    <th>週40h</th>
+			    <th>月残業</th>
+			    <th>月超過</th>
+			    <th>月45h</th>
+			    <th>休憩開始</th>
+			    <th>休憩終了</th>
+			    <th>場所</th>
+			    <th>ステータス</th>
+			    <th>勤務区分</th>
+			  </tr>
+			</thead>
+
+	      <tbody>
+	        <tr th:each="a : ${attendances}">
+	          <td th:text="${a.recordDate}">-</td>
+	          <td th:text="${a.user != null ? a.user.username : '-'}">-</td>
+	          <td th:text="${a.checkInTime != null ? #temporals.format(a.checkInTime, 'HH:mm') : '-'}">-</td>
+	          <td th:text="${a.checkOutTime != null ? #temporals.format(a.checkOutTime, 'HH:mm') : '-'}">-</td>
+
+	          <td th:text="${workTimeMap[a.id]}">-</td>
+	          <td th:text="${overtimeMap[a.id]}">-</td>
+
+	          <td th:text="${nightMap[a.id]}">-</td>
+			  <td th:text="${nightOtMap[a.id]}">-</td>
+	          <td th:text="${holidayMap[a.id]}">-</td>
+	          <td th:text="${premiumMap[a.id]}">-</td>
+			  <td th:text="${premiumPayMap[a.id]}">-</td>
+
+			  <td th:text="${weekHeadMap[a.id] ? weeklyTotalMap[a.user.id] : '-'}">-</td>
+
+			  <td th:text="${weekHeadMap[a.id] ? weeklyOverMinutesMap[a.user.id] : '-'}">-</td>
+
+			  <td th:classappend="${weekHeadMap[a.id] and weeklyOverMap[a.user.id] ? 'badge-warn' : ''}"
+			      th:text="${weekHeadMap[a.id] ? (weeklyOverMap[a.user.id] ? '△ 超過' : '-') : '-'}">-</td>
+				  
+				  <td th:text="${monthHeadMap[a.id] ? monthlyTotalOtMap[a.user.id] : '-'}">-</td>
+
+				  <td th:text="${monthHeadMap[a.id] ? monthlyOverMinutesMap[a.user.id] : '-'}">-</td>
+
+				  <td th:classappend="${monthHeadMap[a.id] and monthlyOverMap[a.user.id] ? 'badge-warn' : ''}"
+				      th:text="${monthHeadMap[a.id] ? (monthlyOverMap[a.user.id] ? '△ 超過' : '-') : '-'}">-</td>
+					  
+	          <td th:text="${a.breakStartTime != null ? #temporals.format(a.breakStartTime, 'HH:mm') : '-'}">-</td>
+	          <td th:text="${a.breakEndTime != null ? #temporals.format(a.breakEndTime, 'HH:mm') : '-'}">-</td>
+	          <td th:text="${a.location != null ? a.location : '-'}">-</td>
+
+	          <td th:text="${a.status == 'normal' ? '通常'
+	            : a.status == 'late' ? '遅刻'
+	            : a.status == 'early' ? '早退'
+	            : a.status == 'absence' ? '欠勤'
+	            : a.status == 'pending' ? '申請中'
+	            : a.status == 'approved' ? '承認'
+	            : a.status == 'rejected' ? '却下'
+	            : (a.status != null ? a.status : '-') }">-</td>
+
+	          <td th:text="${a.workType != null ? a.workType : '-'}">-</td>
+	        </tr>
+
+	        <tr th:if="${#lists.isEmpty(attendances)}">
+	          <td colspan="22">該当する勤怠がありません。</td>
+	        </tr>
+	      </tbody>
+	    </table>
+
+	    <div class="pagination" style="margin-top:16px; display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+	      <a class="button secondary"
+	         th:if="${pageObj.hasPrevious()}"
+	         th:href="@{/admin/attendances(page=${pageObj.number - 1}, from=${from}, to=${to}, userId=${userId})}">
+	        ← 前へ
+	      </a>
+
+	      <span style="margin:0 6px;">
+	        <span th:text="${pageObj.number + 1}">1</span> /
+	        <span th:text="${pageObj.totalPages}">1</span>
+	      </span>
+
+	      <a class="button secondary"
+	         th:if="${pageObj.hasNext()}"
+	         th:href="@{/admin/attendances(page=${pageObj.number + 1}, from=${from}, to=${to}, userId=${userId})}">
+	        次へ →
+	      </a>
+	    </div>
+	  </div>
+
+	  <div class="button-group" style="margin-top:24px;">
+	    <a th:href="@{/admin/dashboard}" class="button secondary">
+	      管理者ダッシュボードへ戻る
+	    </a>
+	  </div>
+
+	</div>
+
+</body>
+</html>

@@ -19,11 +19,12 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-		http
-				.authorizeHttpRequests(authorize -> authorize
-						.requestMatchers("/login", "/css/**", "/js/**").permitAll()
-						.requestMatchers("/admin/**").hasRole("ADMIN")
-						.anyRequest().authenticated())
+		http.authorizeHttpRequests(authorize -> authorize
+				.requestMatchers("/login", "/css/**", "/js/**").permitAll()
+				.requestMatchers("/admin/**").hasRole("ADMIN")
+				.requestMatchers("/employee/**").hasRole("EMPLOYEE")
+				.requestMatchers("/attendance/**").hasRole("EMPLOYEE")
+				.anyRequest().authenticated())
 				.formLogin(form -> form
 						.loginPage("/login")
 						.successHandler((request, response, authentication) -> {
@@ -34,7 +35,7 @@ public class SecurityConfig {
 							if (isAdmin) {
 								response.sendRedirect("/admin/dashboard");
 							} else {
-								response.sendRedirect("/employee/dashboard");
+								response.sendRedirect("/attendance/dashboard");
 							}
 						})
 						.permitAll())
@@ -52,7 +53,7 @@ public class SecurityConfig {
 				.map(user -> org.springframework.security.core.userdetails.User.builder()
 						.username(user.getUsername())
 						.password(user.getPassword())
-						.roles(user.getRole()) // DBは "ADMIN" / "EMPLOYEE"
+						.roles(user.getRole())
 						.disabled(!user.isEnabled())
 						.build())
 				.orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));

@@ -28,10 +28,10 @@ public class DashboardController {
 		User currentUser = userRepository.findByUsername(userDetails.getUsername())
 				.orElseThrow(() -> new RuntimeException("User not found"));
 		if (userDetails.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
-			model.addAttribute("allAttendanceRecords", attendanceService.getAllAttendance());
+			model.addAttribute("allAttendanceRecords", attendanceService.getAllAttendanceView());
 			return "admin_dashboard";
 		} else {
-			model.addAttribute("attendanceRecords", attendanceService.getUserAttendance(currentUser));
+			model.addAttribute("attendanceRecords", attendanceService.getUserAttendanceView(currentUser));
 			return "employee_dashboard";
 		}
 	}

@@ -14,7 +14,7 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
 @Controller
-@RequestMapping("/admin/users")
+@RequestMapping("/admin/users-old")
 @PreAuthorize("hasRole('ADMIN')")
 @RequiredArgsConstructor
 public class UserAdminController {
@@ -47,7 +47,7 @@ public class UserAdminController {
 	public static class UserForm {
 		private String username;
 		private String password;
-		private String role; // "ADMIN" or "EMPLOYEE"（DBに合わせる）
+		private String role;
 		private String email;
 		private String slackWebhook;
 	}

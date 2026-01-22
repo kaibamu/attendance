@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<header th:fragment="appHeader(title)">
+  <h1 th:text="${title}">Title</h1>
+  <p>ようこそ、<span sec:authentication="name"></span>さん</p>
+</header>
+</body>
+</html>

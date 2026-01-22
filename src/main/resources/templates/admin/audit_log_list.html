@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>監査ログ（管理者）</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+  <div class="container">
+    <h1>監査ログ（最新20件）</h1>
+
+    <div class="button-group" style="margin: 12px 0 18px;">
+      <a th:href="@{/admin/users}" class="button secondary">ユーザー一覧へ戻る</a>
+      <a th:href="@{/admin/dashboard}" class="button secondary">管理者ダッシュボードへ戻る</a>
+    </div>
+
+    <div class="table-responsive">
+      <table class="attendance-table">
+        <thead>
+          <tr>
+            <th>日時</th>
+            <th>実行者</th>
+            <th>操作</th>
+            <th>対象ユーザーID</th>
+            <th>対象社員番号</th>
+			<th>対象ユーザー名</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="l : ${logs}">
+            <td th:text="${#temporals.format(l.createdAt, 'yyyy-MM-dd HH:mm:ss')}">-</td>
+            <td th:text="${l.adminUsername}">-</td>
+			<td th:switch="${l.action}">
+			  <span th:case="'RESET_PASSWORD'">パスワード初期化</span>
+			  <span th:case="'TOGGLE_ENABLED'">有効/停止切替</span>
+			  <span th:case="*"
+			        th:text="${l.action}">-</span>
+			</td>
+            <td th:text="${l.targetUserId}">-</td>
+            <td th:text="${l.targetEmployeeNo}">-</td>
+			<td th:text="${l.targetUsername}">-</td>
+          </tr>
+
+          <tr th:if="${#lists.isEmpty(logs)}">
+            <td colspan="5">ログはありません。</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="margin-top:14px; font-size:0.95em; color:#555;">
+      ※停止/再開、パスワード初期化などの重要操作を記録します。
+    </div>
+  </div>
+</body>
+</html>

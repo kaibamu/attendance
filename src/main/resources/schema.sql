@@ -42,3 +42,14 @@ status VARCHAR(50) DEFAULT 'pending', -- 修正依頼のステータス。pendin
 FOREIGN KEY (user_id) REFERENCES users(id), -- user_id は users テーブルの id を参照する外部キー制約。
 FOREIGN KEY (attendance_id) REFERENCES attendance(id) -- attendance_id は attendance テーブルの id を参照する外部キー制約。
 );
+
+CREATE TABLE IF NOT EXISTS admin_action_log (
+  id BIGSERIAL PRIMARY KEY,
+  admin_username VARCHAR(100) NOT NULL,
+  action VARCHAR(50) NOT NULL,
+  target_user_id BIGINT NOT NULL,
+  target_employee_no VARCHAR(20),
+  created_at TIMESTAMP NOT NULL
+);
+ALTER TABLE admin_action_log
+ADD COLUMN target_username VARCHAR(100);

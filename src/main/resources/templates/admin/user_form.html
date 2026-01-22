@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>ユーザー登録（管理者）</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+  <div class="container">
+    <h1>ユーザー登録</h1>
+
+    <p th:if="${error}" class="error-message" th:text="${error}"></p>
+    <p th:if="${success}" class="success-message" th:text="${success}"></p>
+
+    <form th:action="@{/admin/users}" method="post" class="form">
+
+      <!-- 社員番号 -->
+      <label>社員番号</label>
+      <input type="text" name="employeeNo"
+             placeholder="例：A001 / 1001"
+             required>
+
+      <!-- ユーザー名 -->
+      <label style="margin-top:12px;">ユーザー名</label>
+      <input type="text" name="username"
+             placeholder="例：admin / employee1"
+             required>
+
+      <!-- パスワード -->
+      <label style="margin-top:12px;">パスワード</label>
+      <input type="password"
+             id="password"
+             name="password"
+             placeholder="パスワード"
+             required>
+			 <div style="margin-top:6px; font-size:0.9em; color:#666;">
+			   ※パスワードは半角英数字のみ（ルールは将来変更可能）
+			 </div>
+
+      <!-- 👇 表示切替 -->
+      <label style="display:flex; align-items:center; gap:8px; margin-top:8px; font-size:0.95em;">
+        <input type="checkbox" id="togglePassword">
+        パスワードを表示
+      </label>
+
+      <!-- 権限 -->
+      <label style="margin-top:12px;">権限</label>
+      <select name="role">
+        <option value="EMPLOYEE" selected>社員（EMPLOYEE）</option>
+        <option value="ADMIN">管理者（ADMIN）</option>
+      </select>
+
+      <div class="button-group" style="margin-top:18px;">
+        <button type="submit" class="button primary">登録</button>
+        <a th:href="@{/admin/dashboard}" class="button secondary">戻る</a>
+      </div>
+
+    </form>
+  </div>
+
+  <!-- 👇 JS（ページ下部） -->
+  <script>
+    const pw = document.getElementById('password');
+    const toggle = document.getElementById('togglePassword');
+
+    if (pw && toggle) {
+      toggle.addEventListener('change', function () {
+        pw.type = this.checked ? 'text' : 'password';
+      });
+    }
+  </script>
+
+</body>
+</html>

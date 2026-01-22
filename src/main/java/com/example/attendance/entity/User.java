@@ -39,4 +39,7 @@ public class User {
 
 	@Column(nullable = false)
 	private boolean enabled = true;
+
+	@Column(name = "employee_no", unique = true, length = 20)
+	private String employeeNo;
 }

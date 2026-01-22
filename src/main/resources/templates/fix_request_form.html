@@ -20,30 +20,51 @@
 		</table>
 		
 		<form th:action="@{/attendance/history/{id}/request-fix(id=${attendance.id})}" method="post">
-			<p>
-				<label for="newCheckInTime">新しい出勤時刻:</label>
-				<input type="datetime-local" id="newCheckInTime"th:value="${attendance.checkInTime}" required>
-			</p>
-			
-			<p>
-				<label for="newCheckOutTime">新しい退勤時刻:</label>
-				<input type="datetime-local" id="newCheckOutTime"name="newCheckOutTime"th:value="${attendance.checkOutTime}" required>
-			</p>
-			
-			<P>
-				<label for="newBreakEndTime">新しい休憩終了時刻 (任意):</label>
-				<input type="datetime-local" id="newBreakEndTime"name="newBreakEndTime"th:value="${attendance.breakEndTime}">
-			</P>
-			
-			<p>
-				<label for="reason">修正理由:</label>
-				<textarea id="reason" name="reason" rows="5" required></textarea>
-			</p>
-			
-			<div class = "button-group">
-				<button type="submit">依頼を送信</button>
-				<a th:href="@{/attendance/history}" class="button secondary">キャンセル</a>
-			</div>
+
+		  <p>
+		    <label for="newCheckInTime">新しい出勤時刻:</label>
+		    <input type="datetime-local"
+		           id="newCheckInTime"
+		           name="newCheckInTime"
+		           th:value="${attendance.checkInTime}"
+		           required>
+		  </p>
+
+		  <p>
+		    <label for="newCheckOutTime">新しい退勤時刻:</label>
+		    <input type="datetime-local"
+		           id="newCheckOutTime"
+		           name="newCheckOutTime"
+		           th:value="${attendance.checkOutTime}"
+		           required>
+		  </p>
+
+		  <p th:if="${attendance.breakStartTime != null or attendance.breakEndTime != null}">
+		    <label for="newBreakStartTime">新しい休憩開始時刻 (任意):</label>
+		    <input type="datetime-local"
+		           id="newBreakStartTime"
+		           name="newBreakStartTime"
+		           th:value="${attendance.breakStartTime}">
+		  </p>
+
+		  <p th:if="${attendance.breakStartTime != null or attendance.breakEndTime != null}">
+		    <label for="newBreakEndTime">新しい休憩終了時刻 (任意):</label>
+		    <input type="datetime-local"
+		           id="newBreakEndTime"
+		           name="newBreakEndTime"
+		           th:value="${attendance.breakEndTime}">
+		  </p>
+
+		  <p>
+		    <label for="reason">修正理由:</label>
+		    <textarea id="reason" name="reason" rows="5" required></textarea>
+		  </p>
+
+		  <div class="button-group">
+		    <button type="submit" class="button">依頼を送信</button>
+		    <a th:href="@{/attendance/history}" class="button secondary">キャンセル</a>
+		  </div>
+
 		</form>
 	</div>
 </body>
