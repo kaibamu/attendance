@@ -5,6 +5,13 @@
   <title>ユーザー一覧（管理者）</title>
   <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
+<div th:if="${success}" style="background:#e6ffed; border:1px solid #b7eb8f; padding:10px; margin:10px 0;">
+  <span th:text="${success}"></span>
+</div>
+
+<div th:if="${error}" style="background:#fff1f0; border:1px solid #ffa39e; padding:10px; margin:10px 0;">
+  <span th:text="${error}"></span>
+</div>
 <body>
   <div class="container">
     <h1>ユーザー一覧</h1>

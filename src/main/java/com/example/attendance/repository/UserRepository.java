@@ -17,6 +17,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 	Optional<User> findByEmployeeNo(String employeeNo);
 
+	boolean existsByEmployeeNoAndIdNot(String employeeNo, Long id);
+
+	boolean existsByUsernameAndIdNot(String username, Long id);
+
 	List<User> findByUsernameContainingIgnoreCaseOrEmployeeNoContainingIgnoreCase(String username, String employeeNo);
 
 	Page<User> findByUsernameContainingIgnoreCaseOrEmployeeNoContainingIgnoreCase(

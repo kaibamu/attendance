@@ -13,6 +13,7 @@
 			<div th:if="${param.error}" class="error-message">
 				ユーザー名またはパスワードが不正です。
 			</div>
+			<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 			<div th:if="${param.logout}" class="success-message">
 				ログアウトました。
 			</div>

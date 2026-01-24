@@ -40,6 +40,9 @@ public class User {
 	@Column(nullable = false)
 	private boolean enabled = true;
 
+	@Column(name = "must_change_password", nullable = false)
+	private boolean mustChangePassword = false;
+
 	@Column(name = "employee_no", unique = true, length = 20)
 	private String employeeNo;
 }

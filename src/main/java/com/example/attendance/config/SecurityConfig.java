@@ -10,6 +10,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
+import com.example.attendance.entity.User;
 import com.example.attendance.repository.UserRepository;
 
 @Configuration
@@ -17,12 +18,13 @@ import com.example.attendance.repository.UserRepository;
 public class SecurityConfig {
 
 	@Bean
-	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+	public SecurityFilterChain securityFilterChain(HttpSecurity http, UserRepository userRepository) throws Exception {
 
 		http.authorizeHttpRequests(authorize -> authorize
 				.requestMatchers("/login", "/css/**", "/js/**").permitAll()
 				.requestMatchers("/admin/**").hasRole("ADMIN")
 				.requestMatchers("/employee/**").hasRole("EMPLOYEE")
+				.requestMatchers("/employee/password").hasRole("EMPLOYEE")
 				.requestMatchers("/attendance/**").hasRole("EMPLOYEE")
 				.anyRequest().authenticated())
 				.formLogin(form -> form
@@ -34,6 +36,17 @@ public class SecurityConfig {
 
 							if (isAdmin) {
 								response.sendRedirect("/admin/dashboard");
+								return;
+							}
+
+							String username = authentication.getName();
+
+							boolean mustChange = userRepository.findByUsername(username)
+									.map(User::isMustChangePassword)
+									.orElse(false);
+
+							if (mustChange) {
+								response.sendRedirect("/employee/password");
 							} else {
 								response.sendRedirect("/attendance/dashboard");
 							}

@@ -218,8 +218,9 @@ public class AdminUserController {
 			return redirectBack(sort, q, page, size);
 		}
 
-		String tempPassword = "Temp1234!";
+		String tempPassword = generateTempPassword(12);
 		user.setPassword(passwordEncoder.encode(tempPassword));
+		user.setMustChangePassword(true);
 		userRepository.save(user);
 
 		saveAdminLog("RESET_PASSWORD", user);
@@ -228,6 +229,17 @@ public class AdminUserController {
 				"パスワードを初期化しました（仮パス: " + tempPassword + "）");
 
 		return redirectBack(sort, q, page, size);
+	}
+
+	private static final java.security.SecureRandom SECURE_RANDOM = new java.security.SecureRandom();
+	private static final String CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%";
+
+	private String generateTempPassword(int length) {
+		StringBuilder sb = new StringBuilder(length);
+		for (int i = 0; i < length; i++) {
+			sb.append(CHARS.charAt(SECURE_RANDOM.nextInt(CHARS.length())));
+		}
+		return sb.toString();
 	}
 
 	// ===============================
@@ -312,49 +324,45 @@ public class AdminUserController {
 
 		if (emp.isEmpty()) {
 			ra.addFlashAttribute("error", "社員番号を入力してください");
-			return "redirect:/admin/users/" + id + "/edit?sort=" + sort + "&q=" + (q == null ? "" : q.trim())
+			return "redirect:/admin/users/" + id + "/edit?sort=" + sort
+					+ "&q=" + (q == null ? "" : q.trim())
 					+ "&page=" + page + "&size=" + size;
 		}
+
 		if (u.isEmpty()) {
 			ra.addFlashAttribute("error", "ユーザー名を入力してください");
-			return "redirect:/admin/users/" + id + "/edit?sort=" + sort + "&q=" + (q == null ? "" : q.trim())
+			return "redirect:/admin/users/" + id + "/edit?sort=" + sort
+					+ "&q=" + (q == null ? "" : q.trim())
 					+ "&page=" + page + "&size=" + size;
 		}
 
 		// 社員番号 重複チェック（自分以外）
-		userRepository.findByEmployeeNo(emp).ifPresent(other -> {
-			if (!other.getId().equals(user.getId())) {
-				throw new IllegalStateException("DUP_EMP");
+		if (emp != null && !emp.isBlank()) {
+			boolean exists = userRepository.existsByEmployeeNoAndIdNot(emp, id);
+			if (exists) {
+				ra.addFlashAttribute("error", "その社員番号は既に使用されています。");
+				return "redirect:/admin/users/" + id + "/edit?sort=" + sort
+						+ "&q=" + (q == null ? "" : q.trim())
+						+ "&page=" + page
+						+ "&size=" + size;
 			}
-		});
+		}
 
-		// username 重複チェック（自分以外）
-		userRepository.findByUsername(u).ifPresent(other -> {
-			if (!other.getId().equals(user.getId())) {
-				throw new IllegalStateException("DUP_USER");
-			}
-		});
-
-		try {
-			user.setEmployeeNo(emp);
-			user.setUsername(u);
-
-			userRepository.save(user);
-			saveAdminLog("UPDATE_USER", user);
-
-			ra.addFlashAttribute("success", "ユーザー情報を更新しました");
-			return redirectBack(sort, q, page, size);
-
-		} catch (IllegalStateException ex) {
-			if ("DUP_EMP".equals(ex.getMessage())) {
-				ra.addFlashAttribute("error", "その社員番号は既に使われています");
-			} else if ("DUP_USER".equals(ex.getMessage())) {
-				ra.addFlashAttribute("error", "そのユーザー名は既に使われています");
-			} else {
-				ra.addFlashAttribute("error", "更新に失敗しました");
-			}
-			return "redirect:/admin/users/" + id + "/edit?sort=" + sort + "&q=" + (q == null ? "" : q.trim())
+		// ユーザー名 重複チェック（自分以外）
+		if (userRepository.existsByUsernameAndIdNot(u, id)) {
+			ra.addFlashAttribute("error", "そのユーザー名は既に使用されています。");
+			return "redirect:/admin/users/" + id + "/edit?sort=" + sort
+					+ "&q=" + (q == null ? "" : q.trim())
 					+ "&page=" + page + "&size=" + size;
 		}
+
+		user.setEmployeeNo(emp);
+		user.setUsername(u);
+
+		userRepository.save(user);
+		saveAdminLog("UPDATE_USER", user);
+
+		ra.addFlashAttribute("success", "ユーザー情報を更新しました");
+		return redirectBack(sort, q, page, size);
 	}
 }
