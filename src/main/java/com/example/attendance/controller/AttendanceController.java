@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.example.attendance.entity.Attendance; // ← 追加
 import com.example.attendance.entity.User;
+import com.example.attendance.repository.AttendanceRepository; // ← 追加
 import com.example.attendance.repository.UserRepository;
 import com.example.attendance.service.AttendanceService;
 import com.example.attendance.service.FixRequestService;
@@ -24,13 +26,16 @@ public class AttendanceController {
 	private final AttendanceService attendanceService;
 	private final UserRepository userRepository;
 	private final FixRequestService fixRequestService;
+	private final AttendanceRepository attendanceRepository;
 
 	public AttendanceController(AttendanceService attendanceService,
 			UserRepository userRepository,
-			FixRequestService fixRequestService) {
+			FixRequestService fixRequestService,
+			AttendanceRepository attendanceRepository) { // ← 追加
 		this.attendanceService = attendanceService;
 		this.userRepository = userRepository;
 		this.fixRequestService = fixRequestService;
+		this.attendanceRepository = attendanceRepository; // ← 追加
 	}
 
 	@PostMapping("/punch")
@@ -46,7 +51,6 @@ public class AttendanceController {
 		attendanceService.punch(currentUser, type, latitude, longitude);
 
 		return "redirect:/attendance/dashboard";
-
 	}
 
 	@GetMapping("/dashboard")
@@ -83,7 +87,11 @@ public class AttendanceController {
 		User currentUser = userRepository.findByUsername(userDetails.getUsername())
 				.orElseThrow(() -> new RuntimeException("User not found"));
 
+		Attendance attendance = attendanceRepository.findById(attendanceId)
+				.orElseThrow(() -> new RuntimeException("Attendance not found"));
+
 		model.addAttribute("attendanceId", attendanceId);
+		model.addAttribute("attendance", attendance); // ← ★これが超重要
 		model.addAttribute("currentUserName", currentUser.getUsername());
 
 		return "fix_request_form";

@@ -22,28 +22,25 @@
 
           <div class="filter-item">
             <label>社員</label>
-			<select name="userId">
-			  <option value="" th:selected="${cond == null or cond.userId == null}">全員</option>
-
-			  <option th:each="u : ${users}"
-			          th:value="${u.id}"
-			          th:text="${u.username}"
-			          th:selected="${cond != null and cond.userId != null and cond.userId.equals(u.id)}">
-			  </option>
-			</select>
+            <select name="userId">
+              <option value="" th:selected="${cond == null or cond.userId == null}">全員</option>
+              <option th:each="u : ${users}"
+                      th:value="${u.id}"
+                      th:text="${u.username}"
+                      th:selected="${cond != null and cond.userId != null and cond.userId.equals(u.id)}">
+              </option>
+            </select>
           </div>
 
-		  <div class="filter-item">
-		       <label>開始日</label>
-		       <input type="date" name="from"
-		              th:value="${cond != null ? cond.from : ''}">
-		     </div>
+          <div class="filter-item">
+            <label>開始日</label>
+            <input type="date" name="from" th:value="${cond != null ? cond.from : ''}">
+          </div>
 
-		     <div class="filter-item">
-		       <label>終了日</label>
-		       <input type="date" name="to"
-		              th:value="${cond != null ? cond.to : ''}">
-		     </div>
+          <div class="filter-item">
+            <label>終了日</label>
+            <input type="date" name="to" th:value="${cond != null ? cond.to : ''}">
+          </div>
 
           <div class="filter-actions">
             <button type="submit" class="button secondary">検索</button>
@@ -95,7 +92,20 @@
         </table>
       </div>
 
-	  <div class="button-group" style="margin-top:24px;">
+	  <div class="action-row">
+
+	    <a th:href="@{/admin/attendances}" class="button primary">
+	      勤怠一覧（残業・週40h・月45h）
+	    </a>
+
+	    <!-- 未処理件数バッジ -->
+	    <a th:href="@{/admin/fix-requests}" class="button secondary btn-with-badge">
+	      修正依頼一覧（未処理）
+	      <span class="badge-count"
+	            th:if="${pendingFixCount != null and pendingFixCount > 0}"
+	            th:text="${pendingFixCount}"></span>
+	    </a>
+
 	    <a th:href="@{/admin/users/new}" class="button primary">
 	      ユーザー登録
 	    </a>
@@ -109,6 +119,7 @@
 	        ログアウト
 	      </button>
 	    </form>
+
 	  </div>
 
     </div>

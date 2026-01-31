@@ -343,3 +343,56 @@ table.attendance-table td.col-place{
   border: 1px solid #b8e0c2;
   font-weight: 500;
 }
+.alert {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+
+.alert.success {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.alert.error {
+  background: #ffebee;
+  color: #c62828;
+}
+/* ===== 追記ここから：バッジ付きボタン（未処理件数） ===== */
+
+/* ボタン行（横並び＋折り返し） */
+.action-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 24px;
+}
+
+/* バッジ付きボタンの親 */
+.btn-with-badge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 赤い件数バッジ */
+.badge-count {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #e53935;
+  color: #fff;
+  font-size: 12px;
+  line-height: 24px;
+  text-align: center;
+  font-weight: 700;
+}
+
+/* ===== 追記ここまで ===== */

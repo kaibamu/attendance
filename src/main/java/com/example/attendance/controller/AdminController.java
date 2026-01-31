@@ -49,9 +49,15 @@ public class AdminController {
 		return new AdminAttendanceSearchCondition();
 	}
 
+	/** ★追加：どの画面でも使える未処理件数（共通で model に入れる） */
+	private void putPendingFixCount(Model model) {
+		long pending = fixRequestService.countPendingFixRequests();
+		model.addAttribute("pendingFixCount", pending);
+	}
+
 	@GetMapping("/dashboard")
 	public String adminDashboard(
-			@org.springframework.web.bind.annotation.ModelAttribute("cond") com.example.attendance.dto.AdminAttendanceSearchCondition cond,
+			@org.springframework.web.bind.annotation.ModelAttribute("cond") AdminAttendanceSearchCondition cond,
 			Model model) {
 
 		if (cond == null) {
@@ -83,6 +89,9 @@ public class AdminController {
 		model.addAttribute("allAttendanceRecords", attendanceService.toViewList(attendanceRecords));
 		model.addAttribute("users", userRepository.findAll());
 
+		// ★追加
+		putPendingFixCount(model);
+
 		return "admin_dashboard";
 	}
 
@@ -107,31 +116,54 @@ public class AdminController {
 
 		model.addAttribute("allAttendanceRecords", attendanceService.toViewList(attendanceRecords));
 		model.addAttribute("users", userRepository.findAll());
+
+		// ★追加（/attendance からも admin_dashboard を返してるので必要）
+		putPendingFixCount(model);
+
 		return "admin_dashboard";
 	}
 
 	@GetMapping("/fix-requests")
 	public String listFixRequests(Model model) {
 		model.addAttribute("fixRequests", fixRequestService.getAllPendingFixRequests());
-		return "fix_request_list";
+
+		// ★追加
+		putPendingFixCount(model);
+
+		// コントローラはこう返してるので、実ファイルは下のどちらかにする
+		// templates/admin/fix_request_list.html
+		return "admin/fix_request_list";
+	}
+
+	@GetMapping("/fix-requests/all")
+	public String listAllFixRequests(Model model) {
+		model.addAttribute("fixRequests", fixRequestService.getAllFixRequests());
+
+		// ★追加
+		putPendingFixCount(model);
+
+		// templates/admin/fix_request_all.html
+		return "admin/fix_request_all";
 	}
 
 	@PostMapping("/fix-requests/{id}/approve")
 	public String approveFixRequest(@PathVariable("id") Long requestId) {
-		fixRequestService.approveFixRequest(requestId);
-		return "redirect:/admin/fix-requests?success=approved";
+		try {
+			fixRequestService.approveFixRequest(requestId);
+			return "redirect:/admin/fix-requests?success=approved";
+		} catch (IllegalStateException e) {
+			return "redirect:/admin/fix-requests?error=alreadyProcessed";
+		}
 	}
 
 	@PostMapping("/fix-requests/{id}/reject")
 	public String rejectFixRequest(@PathVariable("id") Long requestId) {
-		fixRequestService.rejectFixRequest(requestId);
-		return "redirect:/admin/fix-requests?success=rejected";
-	}
-
-	@GetMapping("/alerts")
-	public String showAnomalyDetection(Model model) {
-		model.addAttribute("anomalies", attendanceService.detectAnomalies());
-		return "anomaly_detection";
+		try {
+			fixRequestService.rejectFixRequest(requestId);
+			return "redirect:/admin/fix-requests?success=rejected";
+		} catch (IllegalStateException e) {
+			return "redirect:/admin/fix-requests?error=alreadyProcessed";
+		}
 	}
 
 	@GetMapping("/attendance/csv")
@@ -143,7 +175,6 @@ public class AdminController {
 
 		response.setContentType("text/csv; charset=UTF-8");
 		response.setHeader("Content-Disposition", "attachment; filename=\"attendance_records.csv\"");
-
 		response.getOutputStream().write(new byte[] { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF });
 
 		List<Attendance> records;
@@ -158,8 +189,6 @@ public class AdminController {
 			records = attendanceService.getAllAttendance();
 		}
 
-		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
 		try (PrintWriter writer = new PrintWriter(response.getOutputStream(), true, StandardCharsets.UTF_8)) {
 
 			writer.append("ID,ユーザー名,日付,出勤,退勤,実働(数値),休憩開始,休憩終了,場所,ステータス\n");
@@ -173,7 +202,6 @@ public class AdminController {
 						: "-";
 
 				String recordDateStr = record.getRecordDate() != null ? record.getRecordDate().toString() : "";
-
 				String checkInStr = record.getCheckInTime() != null ? record.getCheckInTime().format(timeFmt) : "";
 				String checkOutStr = record.getCheckOutTime() != null ? record.getCheckOutTime().format(timeFmt) : "";
 				String breakStartStr = record.getBreakStartTime() != null ? record.getBreakStartTime().format(timeFmt)
@@ -181,14 +209,11 @@ public class AdminController {
 				String breakEndStr = record.getBreakEndTime() != null ? record.getBreakEndTime().format(timeFmt) : "";
 
 				long mins = attendanceService.calcWorkingMinutes(record);
-
 				double workAsDay = mins / 1440.0;
-
 				String workAsDayStr = String.format(Locale.US, "%.6f", workAsDay);
 
-				String workTypeStr = workTypeLabel(record.getWorkType()); // ✅追加
+				String workTypeStr = workTypeLabel(record.getWorkType());
 				String locationStr = record.getLocation() != null ? record.getLocation() : "";
-
 				String statusStr = statusLabel(record.getStatus());
 
 				writer.append(csv(record.getId())).append(",")
@@ -246,5 +271,4 @@ public class AdminController {
 		default -> status;
 		};
 	}
-
 }

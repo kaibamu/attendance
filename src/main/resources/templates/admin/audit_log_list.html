@@ -23,26 +23,42 @@
             <th>操作</th>
             <th>対象ユーザーID</th>
             <th>対象社員番号</th>
-			<th>対象ユーザー名</th>
+            <th>対象ユーザー名</th>
           </tr>
         </thead>
         <tbody>
           <tr th:each="l : ${logs}">
             <td th:text="${#temporals.format(l.createdAt, 'yyyy-MM-dd HH:mm:ss')}">-</td>
             <td th:text="${l.adminUsername}">-</td>
-			<td th:switch="${l.action}">
-			  <span th:case="'RESET_PASSWORD'">パスワード初期化</span>
-			  <span th:case="'TOGGLE_ENABLED'">有効/停止切替</span>
-			  <span th:case="*"
-			        th:text="${l.action}">-</span>
-			</td>
+
+            <td th:switch="${l.action}">
+              <!-- 既存 -->
+              <span th:case="'RESET_PASSWORD'">パスワード初期化</span>
+              <span th:case="'TOGGLE_ENABLED'">有効/停止 切替</span>
+
+              <!-- よく出る操作を追加 -->
+              <span th:case="'CREATE_USER'">ユーザー登録</span>
+              <span th:case="'UPDATE_USER'">ユーザー更新</span>
+              <span th:case="'DELETE_USER'">ユーザー削除</span>
+
+              <span th:case="'APPROVE_FIX'">修正依頼 承認</span>
+              <span th:case="'REJECT_FIX'">修正依頼 却下</span>
+
+              <span th:case="'LOGIN'">ログイン</span>
+              <span th:case="'LOGOUT'">ログアウト</span>
+
+              <!-- 不明なコードは「その他(英字)」にする -->
+              <span th:case="*"
+                    th:text="${'その他（' + l.action + '）'}">-</span>
+            </td>
+
             <td th:text="${l.targetUserId}">-</td>
             <td th:text="${l.targetEmployeeNo}">-</td>
-			<td th:text="${l.targetUsername}">-</td>
+            <td th:text="${l.targetUsername}">-</td>
           </tr>
 
           <tr th:if="${#lists.isEmpty(logs)}">
-            <td colspan="5">ログはありません。</td>
+            <td colspan="6">ログはありません。</td>
           </tr>
         </tbody>
       </table>
